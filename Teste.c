@@ -1,46 +1,41 @@
+//print suggestions for queries
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
-int main() {
-  
-  int N, M, z1, z2, z3, z4, maiorX = 0, index = 0;
+#define SIZE 100
+#define MAX_TEXT 101  // MAX_TEXT = SIZE + 1
 
-  scanf("%d %d", &N, &M);
-
-  int pontoX[N], pontoY[N], cliqueX[M], cliqueY[M];
-  char cliqueLetra[M];
-
-  for(int i = 0; i < N; i++){
-    scanf("%d %d", &pontoX[i], &pontoY[i]);
-    if(maiorX < pontoX[i]){
-      maiorX = i;
-    }
-  }
-
-  for(int i = 0; i < M; i++){
-    scanf(" %c %d %d", &cliqueLetra[i], &cliqueX[i], &cliqueY[i]);
-  }
-
-  for(int j = 0; j < M; j++){
-    for(int i = 0; i < N; i ++){
-      if(i == N-1){
-        z1 = (pontoX[0] - pontoX[N-1])*(cliqueY[j] - pontoY[N-1]) - (pontoY[0] - pontoY[N-1])*(cliqueX[j] - pontoX[N-1]);
-        z2 = (pontoX[0] - pontoX[N-1])*(cliqueY[j] - pontoY[N-1]) - (pontoY[0] - pontoY[N-1])*(cliqueX[maiorX] - pontoX[N-1]);
-        z3 = (cliqueX[maiorX] - cliqueX[j])*(pontoY[N-1] - cliqueY[j]) - (cliqueY[j] - cliqueY[j])*(pontoX[N-1] - cliqueX[j]);
-        z4 = (cliqueX[maiorX] - cliqueX[j])*(pontoY[0] - cliqueY[j]) - (cliqueY[j] - cliqueY[j])*(pontoX[0] - cliqueX[j]);
-      } else{
-        z1 = (pontoX[i+1] - pontoX[i])*(cliqueY[j] - pontoY[i]) - (pontoY[i+1] - pontoY[i])*(cliqueX[j] - pontoX[i]);
-        z2 = (pontoX[i+1] - pontoX[i])*(cliqueY[j] - pontoY[i]) - (pontoY[i+1] - pontoY[i])*(cliqueX[maiorX] - pontoX[i]);
-        z3 = (cliqueX[maiorX] - cliqueX[j])*(pontoY[i] - cliqueY[j]) - (cliqueY[j] - cliqueY[j])*(pontoX[i] - cliqueX[j]);
-        z4 = (cliqueX[maiorX] - cliqueX[j])*(pontoY[i+1] - cliqueY[j]) - (cliqueY[j] - cliqueY[j])*(pontoX[i+1] - cliqueX[j]);
-      }
-      if((z1*z2) < 0 && (z3*z4) < 0){
-        index++;
+void print_suggestions(char *str, char database[][MAX_TEXT], int n){
+    int n_suggestions = 0;
+    for (int i = 0; i < n; i++){
+      if (strncmp(str, database[i], strlen(str)-1) == 0){
+        printf("Do you mean: %s?\n", database[i]);
+        n_suggestions++;
       }
     }
-    if(index == N){
-      printf("%c", cliqueLetra[j]);
-    }
-  }
+    if (n_suggestions == 0) printf ("No suggestions\n");
+}
 
+void fill_database(int i, char database[][MAX_TEXT]) {
+  fgets(database[i], MAX_TEXT, stdin);
+  database[i][strlen(database[i]) - 1] = '\0';
+}
+
+int main(void) {
+  char database[SIZE][MAX_TEXT] = {0};
+  char str[MAX_TEXT] = {0};
+  int previous, current;
+
+  scanf("%d\n", &previous);
+
+  for (int i = 0; i < previous; i++)
+    fill_database(i, database);
+  scanf("%d\n", &current);
+  for (int i = 0; i < current; i++) {
+    fgets(str, MAX_TEXT, stdin);
+    print_suggestions(str, database, previous);
+    printf("\n");
+  }
   return 0;
 }
