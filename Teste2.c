@@ -2,18 +2,27 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define len 10
+
 int main(void) {
-  int dice, turns;
+  int seed, *arr, count = 0;
+  arr = (int *) calloc(len, sizeof(int));
 
-  printf("What kind of dice you have? ");
-  scanf("%d", &dice);
-  printf("How many turns? ");
-  scanf("%d", &turns);
-
-  //sreend give a seed to the random generator and time(NULL) gives the current time to seed the generator
-  srand(time(NULL));
-  for(int i=0; i<turns; i++)  printf("Turn %d: %d\n", i+1, rand()%dice + 1);
-  printf("\n");
+  srand(seed);
+  do {
+    int num = rand() % n_numbers;
+    bool b = false;
+    for (int i = 0; i < count; i++) {
+      if (arr[i] == num) {
+        b = true;
+        break;
+      }
+    }
+    if (!b) {
+      arr[count] = num;
+      count++;
+    }
+  } while (count < n_numbers);
 
   return 0;
 }
