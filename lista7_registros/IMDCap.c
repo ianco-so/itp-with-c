@@ -11,14 +11,15 @@ typedef struct card{
     int *mark;
 } Card;
 
-int * sort (int M, int N, int seed) {
-    int *arr = (int *) calloc(N, sizeof(int));
+int * sort (int M, int len, int seed) {
+    int *arr = (int *) calloc(len, sizeof(int));
     int count = 0, num = 0;
     bool has = false;
 
     srand(seed);
     do {
         num = rand() % M;
+        num += 1;
         has = false;
         for (int i = 0; i < count; i++) {
             if (arr[i] == num) {
@@ -30,22 +31,22 @@ int * sort (int M, int N, int seed) {
             arr[count] = num;
             count++;
         }
-    } while (count < N);
+    } while (count < len);
     return arr;
 }
-void mark_card(Card card, int N, int sorted[N]) {
-    for (int i = 0; i < N; i++) {
-        if (card.nums[i] == sorted[i]) {
+void mark_card(Card card, int last_sorted) {
+    for (int i = 0; i < card.N; i++) {
+        if (card.nums[i] == last_sorted) {
             card.mark[i] = 1;
-        } else {
-            card.mark[i] = 0;
         }
     }
 }
 
-int check_champ (Card card, int N) {
-    for (int i = 0; i < N; i++) {
-        if (card.mark[i] == 0) return 0;
+int check_champ (Card card) {
+    for (int i = 0; i < card.N; i++) {
+        if (card.mark[i] == 0) {
+            return 0;
+        }
     }
     return 1;
 }
@@ -60,40 +61,52 @@ void init_card(Card *card, int T, int N, int M, int i) {
 int main (void) {
     int M = 0, N = 0, S = 0, n_players = 1;
     int * sorted;
-    int champ = 0;
+    Card champ;
+    int len_sorted_arr = 0;
     Card *cards;
     char line[16] = {0};
 
     scanf("%d %d %d", &N, &M, &S);
     getchar();
-    sorted = sort(M, N, S);
 
     cards = (Card *) calloc(1, sizeof(Card));
     fgets(line, 16, stdin);
-
+    //inicilizer all cards
     while(strcmp(line, "Comecou o jogo!") != 0) {
         int T = atoi(line);
         init_card(cards, T, N, M, n_players-1);
         cards = (Card *) realloc(cards, sizeof(Card) * (n_players + 1));
-        mark_card(cards[n_players-1], N, sorted);
         n_players++;
         fgets(line, 16, stdin);
     }
     n_players--;
-
-    for (int i = 0; i < n_players; i++) {
-        if (check_champ(cards[i], N)) {
-            champ = cards[i].id_card;
-            break;
+    //lets play
+    bool stop = false;
+    do {
+        len_sorted_arr++;
+        sorted = sort(M, len_sorted_arr , S);
+        for (int i = 0; i < n_players; i++) {
+            mark_card(cards[i], sorted[len_sorted_arr - 1]);
+            if(check_champ(cards[i])) {
+                champ = cards[i];
+                stop = true;
+                break;
+            }
         }
-    }
-    for (int i = 0; i < N; i ++) {
+    } while (len_sorted_arr < M && !stop);
+    //for the future
+    for (int i = 0; i < len_sorted_arr; i ++) {
         printf("%d ", sorted[i]);
     }
     printf("\n");
-    printf("Bingo! Cartela %d: ", champ);
-    for (int i = 0; i < cards[champ].N; i++) {
-        printf("%d ", cards[champ].nums[i]);
+    printf("Bingo! Cartela %d: ", champ.id_card);
+    for (int i = 0; i < n_players; i++) {
+        if (cards[i].id_card == champ.id_card) {
+            for (int j = 0; j < N; j++) {
+                printf("%d ", cards[i].nums[j]);
+            }
+            break;
+        }
     }
     return 0;
 }
