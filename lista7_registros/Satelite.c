@@ -168,28 +168,3 @@ int main() {
     );
     return 0;
 }
-
-    /*
-    //handle with the integer part
-    foo = calloc(int_len, sizeof(char));
-    char * integer = strtok(str, "."); //get the integer part
-    bf.integer.size = strlen(integer)%int_len == 0 ? strlen(integer)/int_len : strlen(integer)/int_len + 1; //get the size of the integer part
-    bf.integer.array = (unsigned int *)calloc(bf.integer.size, sizeof(unsigned int)); //allocate memory for the integer part
-    int jump = 0;
-    if (bf.integer.size == strlen(integer)/int_len + 1) {
-        jump = strlen(integer)%int_len;
-        strncpy(foo, integer, jump);
-        bf.integer.array[bf.integer.size-1] = atoi(foo);
-        for (int i = bf.integer.size-2; i >= 0; i--) {
-            strncpy(foo, integer + jump, int_len);
-            jump += int_len;
-            bf.integer.array[i] = atoi(foo);
-        }
-    } else {
-        for (int i = bf.integer.size-1; i >= 0; i--) {
-            strncpy(foo, integer + i*int_len, int_len);
-            bf.integer.array[i] = atoi(foo);
-        }
-    }
-    free(foo);
-    */
