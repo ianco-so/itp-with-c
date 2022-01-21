@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 //Read the quantity of values in each factor
 void read_values(int n, int * values){
@@ -23,16 +24,25 @@ void print_values(int n, int * current){
 //Generate all combinations of factors with the recursive method
 void generate_combinations(int n, int *values, int * current, int i){
     if (i < n) {
-        if (current[n-1-i] < values[n-1-i]) {
+        if (current[n-1] < values[n-1]) {
             print_values(n, current);
+            current[n-1]++;
+            generate_combinations(n, values, current, i);
+        } else { //if (current[n-1] == values[n-1]) 
+
+            //reset all values to 0 after the desired value
+            memset(current+n-1-i, 0, n*sizeof(int));
+            /*
+            for(int j=n-1-i;j<=n-1;j++){
+                current[j] = 0;
+            }
+            */
+            i++;
             current[n-1-i]++;
-            generate_combinations(n, values, current, i, j+1);
-        } else { 
-            current[n-1-i] = 0;
-            generate_combinations(n, values, current, i+1);
+            generate_combinations(n, values, current, i);
         }
-    } else {
-        return;
+    } else if (i == n) {
+        
     }
 }
 
@@ -42,6 +52,6 @@ int main (void) {
     int * values = calloc(n, sizeof(int)); //quantity of values in each factor
     int * current = calloc(n, sizeof(int)); //current combination of factors
     read_values(n, values);
-    generate_combinations(n, values, current, 0, 0);
+    generate_combinations(n, values, current, 0);
     return 0;
 }
