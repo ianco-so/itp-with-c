@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-define NAME_LEN 50
+#define NAME_LEN 50
 
 
 typedef struct PERSON{
@@ -11,17 +11,17 @@ typedef struct PERSON{
 } Person;
 
 Person create (char * name, int age, char gender);
-void update (int *n, Person *people[p], Person p);
+void update (int *n, Person people[*n], Person p);
 int delete (Person *persons, Person p);
-void print(Person *persons);
+void print(int n, Person persons[n]);
 
-int main (void) {
-    char option = '\0', gender, *name;
-    int age, *countA;
+int main(void) {
+    char option = ' ', gender, *name = NULL;
+    int age, *countA = NULL;
     Person *people, person;
-
     *countA = 0;
-
+    people = calloc(1, sizeof(Person));
+    printf("test");
     do {
         scanf("%c", option);
         switch (option) {
@@ -29,19 +29,17 @@ int main (void) {
                 fgets(name, NAME_LEN, stdin);
                 scanf("%d", &age);
                 scanf("%c", &gender);
-                update(&countA, people, create(name, age, gender););
+                update(countA, people, create(name, age, gender));
                 break;
             case 'd':
-
                 break;
-            case 'i':
-                break;
-            case 'p':
+            case 'P':
+                print(*countA, people);
                 break;
             default:
                 break;
         }
-    } while (option !- 'P');
+    } while (option != 'P');
     return 0;
 }
 
@@ -51,5 +49,13 @@ Person create (char * name, int age, char gender) {
 }
 
 void update (int *n, Person *people, Person p) {
-    people = realloc()
+    people = realloc(people, sizeof(people) * (*n +1));
+    people[*n] = p;
+    *n++;
+}
+
+void print(int n, Person persons[n]) {
+    for (int i = 0; i < n; i++) {
+        printf("%s %d %c\n", persons[i].name, persons[i].age, persons[i].gender);
+    }
 }
