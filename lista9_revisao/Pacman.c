@@ -10,7 +10,7 @@ int canEat(int l, int c, char map[l][c], int checked[l][c], int pX, int pY, int 
         return 1;
     }
     //chack if the pacman could move up. The position should contain a '.' or 'C'.
-    if  (pX >= 0 && (map[pX-1][pY] == '.' || map[pX-1][pY] == ' ' || map[pX-1][pY] == 'C') ) { //&& checked[pX - 1][pY] == 0
+    if  (pX >= 0 && (map[pX-1][pY] == '.' || map[pX-1][pY] == ' ' || map[pX-1][pY] == 'C') && checked[pX - 1][pY] == 0) { //
         //mark the position as checked
         checked[pX][pY] = 1;
         ate = canEat(l, c, map, checked, pX-1, pY, fX, fY);
@@ -58,6 +58,16 @@ void pacman (int l, int c, char map[l][c], int pX, int pY, int *foodsEaten) {
 
     //set all the positions to 0
     memset(checked, 0, sizeof(checked));
+    
+    /*
+    printf("Mapa final:\n");
+    for (int i = 0; i < l; i++) {
+        for (int j = 0; j < c; j++) {
+            printf("%c", map[i][j]);
+        }
+        printf("\n");
+    }
+    */
 
     //check if the food is possible to eat by Pacman
     for (int i = 0; i < l; i++) {
@@ -100,6 +110,7 @@ int main (void) {
                 pY = j;
             }
         }
+        getchar();
     }
 
     pacman(l, c, map, pX, pY, &foodsEaten);
