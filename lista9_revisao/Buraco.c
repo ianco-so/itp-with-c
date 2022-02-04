@@ -2,7 +2,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_GAME_LEN 50
+#define MAX_GAME_LEN 1000
+
+typedef enum SUIT {
+    HEARTS = 3, //"♥" = 3 \u2665
+    DIAMONDS, //"♦" = 4 \u2666
+    CLUBS, //"♣" = 5 \u2663
+    SPADES//"♠" = 6 \u2660
+} Suit;
 
 typedef struct CARD { //A card have a suit and a value
     int value;
@@ -71,7 +78,25 @@ void print_card (Card card) {
             printf("%d", card.value);
             break;
     }
-    printf("%c ", card.suit);
+    
+    //printf("%c ", card.suit);
+
+    switch (card.suit) {
+        case -91: //HEART
+            printf("\u2665 ");
+            break;
+        case -90: //DIAMOND
+            printf("\u2666 ");
+            break;
+        case -93: //CLUB
+            printf("\u2663 ");
+            break;
+        case -96: //SPADE
+            printf("\u2660 ");
+            break;
+        default:
+            break;
+    }
 }
 
 //print the game  
@@ -111,16 +136,16 @@ void check_games (int ngames, int ncards[ngames], Card ** cards) {
             }
         }
         if (is_valid) {
-            if (joker_count == 0) printf(" e valido\n");  // é válido
+            if (joker_count == 0) printf(" é válido\n");  
             else {
-                printf(" e valido, ");  // é válido
+                printf(" é válido, ");
                 print_card(joker);
                 printf(" no lugar de ");
                 print_card(surrogate);
                 printf("\n");
             }
         }
-        else printf(" e invalido\n"); // é inválido
+        else printf(" é inválido\n");
     }
 }
 
@@ -136,7 +161,8 @@ int main (void) {
     //Read the games and initialize the variables
     for (int i = 0; i < ngames; i++) {
         fgets(games[i], MAX_GAME_LEN+1, stdin);
-        games[i][strlen(games[i]) - 3] = '\0';
+        if (i == ngames-1) games[i][strlen(games[i]) - 2] = '\0';
+        else games[i][strlen(games[i]) - 3] = '\0';
         memmove(&games[i][0], &games[i][2], strlen(games[i]));
     }
     for (int i = 0; i < ngames; i++) ncards[i] = 0;

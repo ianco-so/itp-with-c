@@ -98,7 +98,7 @@ void imprimePalavra (char *c, int salto, int tam) {
     printf(", salto:%d\n", salto);
 }
 
-int main (void) {
+int main (void) { //main function
     //initially, we will to read the number of the words to be hunted
     char board[10][10], *w;
     int n, steps = 0;
@@ -113,7 +113,7 @@ int main (void) {
     //further we going to read a matrix 10x10 of letters which will be the board (the words will be in the board)
     for (int i = 0; i < 10; i++) {
         scanf("%s", board[i]);
-    }
+    } //finally, we will read the number of words to be hunted
     //for each word we will verify if it is in the board, if it is,
     // we will return the position of the first letter of the word and the steps for the letters following it
     for (int i = 0; i < n; i++) {
