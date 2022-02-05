@@ -39,31 +39,19 @@ void print_people(int n, Person *people) {
 Person * delete(int *n, Person *people, Person p) {
     int isEqual = 0;
     int pos = 0;
-    Person *newpeople = NULL;
+    //Person *newpeople = NULL;
     for (int i = 0; i < *n; i++) {
         if(strcmp(p.name, people[i].name) == 0 && p.age == people[i].age && p.gender == people[i].gender) {
             isEqual = 1;
             pos = i;
-            people[i].name[0] = '\0';
-            people[i].age = 0;
-            people[i].gender = '\0';
             break;
         }
     } 
     if (isEqual) {
-        newpeople = malloc(sizeof(Person*)*(*n-1));
-        for(int i = 0; i < pos; i++) {
-            strncpy(newpeople[i].name, people[i].name, NAME_LEN);
-            newpeople[i].age = people[i].age;
-            newpeople[i].gender = people[i].gender;
+        if (pos == *n-1) *n = *n-1;
+        else {
+            for (int i = pos; i < *n-1; i++) people[i] = people[i+1];
         }
-        for (int i = pos+1; i < *n; i++) {
-            strncpy(newpeople[i-1].name, people[i].name, NAME_LEN);
-            newpeople[i-1].age = people[i].age;
-            newpeople[i-1].gender = people[i].gender;
-        }
-        *n = *n-1;
-        return newpeople;
     } else {
         return people;
     }
@@ -77,10 +65,9 @@ int main(void) {
     //printf("test\n");
     do {
         scanf(" %c", &op);
-        //getchar();
+        getchar();
         switch (op) {
             case 'i':
-                getchar();
                 fgets(name, NAME_LEN, stdin);
                 name[strlen(name) - 1] = '\0';
                 scanf("%d", &age);
@@ -90,7 +77,6 @@ int main(void) {
                 people = update(&count, people, p);
                 break;
             case 'd':
-                getchar();
                 fgets(name, NAME_LEN, stdin);
                 name[strlen(name) - 1] = '\0';
                 scanf("%d", &age);
@@ -103,7 +89,7 @@ int main(void) {
                 print_people(count, people);
                 break;
             default:
-                break;
+            break;
         }
     } while (op != 'P');
     return 0;
