@@ -16,6 +16,11 @@ the environment safe
 //SNAPPER (Cioba): R$ 150.00/Kg (20 <= x < 30)
 //SEABASS (Robalo): R$ 200.00/Kg (30 <= x < 40)
 
+typedef enum FishPrice {
+  MULLET = 100,
+  SNAPPER = 150,
+  SEABASS = 200
+} fPrice;
 
 typedef struct POSITION {
   int x, y;
@@ -48,14 +53,11 @@ Bot * readData(int h, int w, int fishingArea[h][w], int *nBots) {
 }
 
 int priceOfFish(int x) { // return the price of the fish x
-  if (x == 1) {
-    return 100;
-  } else if (x == 2) {
-    return 150;
-  } else if (x == 3) {
-    return 200;
-  } else {
-    return 0;
+  switch (x) {
+    case 1: return MULLET; break;
+    case 2: return SNAPPER; break;
+    case 3: return SEABASS; break;
+    default: return 0; break;
   }
 }
 Position findCloserFishingSpot (int h, int w, int nEnemies, int fishingArea[h][w], Bot enemies[nEnemies], Position currentPosition) {
@@ -72,7 +74,7 @@ Position findCloserFishingSpot (int h, int w, int nEnemies, int fishingArea[h][w
   for (int i = 0; i < nEnemies; i++) {
     copiedFishingArea[enemies[i].position.x][enemies[i].position.y] = -1;
   }
-  //Overlap the copied fishing area with the current position
+  //As the map was overlap on my bot's position and I don't want to lose the information, I return it now
   copiedFishingArea[currentPosition.x][currentPosition.y] = fishingArea[currentPosition.x][currentPosition.y];
 
   //Find the closer fishing spot
