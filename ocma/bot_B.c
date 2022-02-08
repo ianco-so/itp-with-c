@@ -1,7 +1,7 @@
 /********************************************************************
   Bot-exemplo
   
-  Bot_A: anda pra esquerda
+  Bot_B: anda pra esquerda
   
   Após receber as informações iniciais do jogo, a cada rodada esse
   bot irá se movimentar para esquerda.
