@@ -13,7 +13,7 @@ the environment safe
 
 #include "definitions.h"
 #include "io.h"
-#include "localization.h"
+#include "localizationA.h"
 
 int main() {
   char line[MAX_STR];   // temporarily data
@@ -21,6 +21,7 @@ int main() {
   int nBots;        
   Bot *bots;
   MyBot myBot;
+  Position goalPosition;
 
   setbuf(stdin, NULL);   // stdin, stdout and stderr are unbuffered, so nothing is keeping momentarily
   setbuf(stdout, NULL);
@@ -51,7 +52,7 @@ int main() {
     // insert a logic to be executed each turn
     overlappedFishingArea = OverlapFishingArea(h, w, fishingArea, nBots, bots, myBot.bot.position);
     if (myBot.weight < 10) {
-      Position goalPosition = FindCloserFishingSpot(h, w, overlappedFishingArea, myBot.bot.position);
+      goalPosition = FindCloserFishingSpot(h, w, overlappedFishingArea, myBot.bot.position);
       if (goalPosition.x == myBot.bot.position.x && goalPosition.y == myBot.bot.position.y) {
         action ="FISH";
       } else {

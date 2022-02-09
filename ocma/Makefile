@@ -1,7 +1,13 @@
 PARAMS = -g -W -pedantic
-all: bot_A.c io localization
-	gcc bot_A.c io.o localization.o -o bot_A $(PARAMS)
+all: ocma.js bot_A bot_B
+	node ocma bot_A bot_B
+bot_B: bot_B.c io localizationB
+	gcc bot_B.c io.o localizationB.o -o bot_B $(PARAMS)
+bot_A: bot_A.c io localizationA
+	gcc bot_A.c io.o localizationA.o -o bot_A $(PARAMS)
 io:
 	gcc io.c -c $(PARAMS)
-localization:
-	gcc localization.c -c $(PARAMS)
+localizationA:
+	gcc localizationA.c -c $(PARAMS)
+localizationB:
+	gcc localizationB.c -c $(PARAMS)
