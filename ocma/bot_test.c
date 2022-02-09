@@ -1,5 +1,5 @@
 /********************************************************************
-bot_A
+bot_test.c
   
 After receiving the initial information of the game, each round this
 bot will find the best action to take and send it to the ocma.
@@ -29,75 +29,176 @@ typedef struct PLAYER {
   char id[MAX_STR];
   Position position;
 } Bot;
- 
-Bot * ReadData(int h, int w, int fishingArea[h][w], int *nBots) {
-  char id[MAX_STR];
-  int n;
 
-  // read the fishing area
-  for (int i = 0; i < h; i++) {   
-    for (int j = 0; j < w; j++) {
-      scanf("%i", &fishingArea[i][j]);
+typedef struct PLAYER1 {
+  Bot bot;
+  int weight;
+  float profit;
+}MyBot;
+
+Bot * ReadData(int h, int w, int fishingArea[h][w], int *nBots, FILE *file);
+
+int FishPricing(int x);
+
+int ** OverlapFishingArea(int h, int w, int fishingArea[h][w], int nBots, Bot bots[nBots], Position myPosition);
+
+Position FindCloserPort (int h, int w, int **overlappedFishingArea, Position myPosition);
+
+int isNumber(char *line);
+
+Position FindCloserFishingSpot (int h, int w, int **overlappedFishingArea, Position myPosition);
+
+char * findPath(int h, int w, int **overlappedFishingArea, Position myPosition, Position goalPosition);
+
+int main(void) {
+  char line[MAX_STR];
+  char *action;
+  int nBots;        
+  Bot *bots;
+  MyBot myBot;
+  Position prePosition;
+  int h, w;
+
+  // Read the initial information of the game
+  FILE* file = fopen("Entry.txt", "r");
+  if (file == NULL) {
+    printf("Error opening file!\n");
+  }
+
+  fscanf(file, "AREA %i %i", &h, &w);
+  printf("AREA: %ix%i\n", h, w);
+  int fishingArea[h][w];
+  int **overlappedFishingArea = NULL;
+  fscanf(file, " ID %s", myBot.bot.id);
+  int count = 0;
+  while (count < 2) {
+    memset(fishingArea, 0, sizeof(fishingArea));
+    bots = ReadData(h, w, fishingArea, &nBots, file);
+
+    //print fishing area and bots
+    for (int i = 0; i < h; i++) {
+      for (int j = 0; j < w; j++) {
+        printf("%i ", fishingArea[i][j]);
+      }
+      printf("\n");
+    }
+    for (int i = 0; i < nBots; i++) {
+      printf("%s %i %i\n", bots[i].id, bots[i].position.x, bots[i].position.y);
+    }
+    //prePosition = myBot.bot.position;
+
+    for (int i = 0; i < nBots; i++) {
+      if (strcmp(bots[i].id, myBot.bot.id) == 0) {
+        strcpy(myBot.bot.id, bots[i].id);
+        myBot.bot.position = bots[i].position;
+        break;
+      }
+    }
+
+    printf("My ID: %s\n", myBot.bot.id);
+    printf("My position: %i %i\n", myBot.bot.position.x, myBot.bot.position.y);
+
+    overlappedFishingArea = OverlapFishingArea(h, w, fishingArea, nBots, bots, myBot.bot.position);
+    if (myBot.weight < 10) {
+      Position goalPosition = FindCloserFishingSpot(h, w, overlappedFishingArea, myBot.bot.position);
+      printf("My goal position: %i %i\n", goalPosition.x, goalPosition.y);
+      if (goalPosition.x == myBot.bot.position.x && goalPosition.y == myBot.bot.position.y) {
+        action = "FISH";
+        printf("ACTION: %s\n", action);
+      } else {
+        action = findPath(h, w, overlappedFishingArea, myBot.bot.position, goalPosition);
+      }
+    } else {
+      Position goalPosition = FindCloserPort(h, w, overlappedFishingArea, myBot.bot.position);
+      if (goalPosition.x == myBot.bot.position.x && goalPosition.y == myBot.bot.position.y) {
+        action = "SELL";
+        printf("ACTION: %s\n", action);
+      } else {
+        action = findPath(h, w, overlappedFishingArea, myBot.bot.position, goalPosition);
+      }
+    }
+    
+    printf("ACTION: %s\n", action);
+
+    fscanf(file, "%s", line);
+
+    if (isNumber(line)) myBot.profit += atoi(line);
+    else if (strcmp(line, "MULLET") == 0 || strcmp(line, "SNAPPER") == 0 || strcmp(line, "SEABASS") == 0) myBot.weight++;
+    else if (strcmp(line, "IMPACT") == 0) myBot.profit -= 5e4;
+    else if (strcmp(line, "OUT") == 0)  myBot.profit -= 5e2;
+    else if (strcmp(line, "DONE") == 0 || strcmp(line, "NONE") == 0 || strcmp(line, "BUSY") == 0) {}// do nothing kkkkkk
+    count++;
+  }
+  count++;
+  if (file != NULL) fclose(file);
+  return 0;
+}
+
+char * findPath(int h, int w, int **overlappedFishingArea, Position myPosition, Position goalPosition) {
+  if (myPosition.x > goalPosition.x) { //above
+    if (overlappedFishingArea[myPosition.x - 1][myPosition.y] != -1)  return "UP"; //and there is no obstacle
+    else if (myPosition.y == goalPosition.y){ //if there is obstacle, but the obstacle is in the same column (case the goal is not in the same column this will be treated in the next ifs)
+      if (myPosition.y < w - 1) {
+        if (overlappedFishingArea[myPosition.x][myPosition.y + 1] != -1) return "RIGHT";
+        else return "UP";
+      } else if (myPosition.y > 0) {
+        if (overlappedFishingArea[myPosition.x][myPosition.y - 1] != -1) return "LEFT";
+        else return "UP";
+      } else return "STAY"; //All movements are blocked
+    } 
+  }
+  if (myPosition.x < goalPosition.x) { //below
+    if (overlappedFishingArea[myPosition.x + 1][myPosition.y] != -1)  return "DOWN";
+    else if (myPosition.y == goalPosition.y){
+      if (myPosition.y < w - 1) {
+        if (overlappedFishingArea[myPosition.x][myPosition.y + 1] != -1) return "RIGHT";
+        else return "DOWN";
+      } else if (myPosition.y > 0) {
+        if (overlappedFishingArea[myPosition.x][myPosition.y - 1] != -1) return "LEFT";
+        else return "DOWN";
+      } else return "STAY"; //All movements are blocked
     }
   }
-
-  // read the data of the players
-  scanf(" BOTS %i", &n); // The ' ' is for the '\n' of the previous line
-  *nBots = n; 
-  Bot *bots = malloc(n * sizeof(Bot));
-  for (int i = 0; i < n; i++) {
-    scanf("%s %i %i", bots[i].id, &bots[i].position.x, &bots[i].position.y);
+  if (myPosition.y < goalPosition.y) { //right
+    if (overlappedFishingArea[myPosition.x][myPosition.y + 1] != -1)  return "RIGHT"; //and there is no obstacle
+    else if (myPosition.x < h - 1) {
+      if (overlappedFishingArea[myPosition.x + 1][myPosition.y] != -1) return "DOWN";
+      else return "STAY";
+    } 
+    else if (myPosition.x > 0) {
+      if (overlappedFishingArea[myPosition.x - 1][myPosition.y] != -1) return "UP";
+      else return "RIGHT";
+    } else return "STAY"; //All movements are blocked
   }
-  return bots;
-}
-
-int FishPricing(int x) { // return the price of the fish x
-  switch (x) {
-    case 1: return MULLET; break;
-    case 2: return SNAPPER; break;
-    case 3: return SEABASS; break;
-    default: return 0; break;
+  if (myPosition.y > goalPosition.y) { //left
+    if (overlappedFishingArea[myPosition.x][myPosition.y - 1] != -1)  return "LEFT";
+    else if (myPosition.x < h - 1) {
+      if (overlappedFishingArea[myPosition.x + 1][myPosition.y] != -1) return "DOWN";
+      else return "LEFT";
+    }
+    else if (myPosition.x > 0) {
+      if (overlappedFishingArea[myPosition.x - 1][myPosition.y] != -1) return "UP";
+      else return "LEFT";
+    } else return "STAY"; //All movements are blocked
   }
+  return "STAY";
 }
 
-int ** OverlapFishingArea(int h, int w, int fishingArea[h][w], int nBots, Bot bots[nBots], Position myPosition) {
-  // create the matrix of the overlap
-  int **overlapFishingArea = malloc(h * sizeof(int *));
-  for (int i = 0; i < h; i++) overlapFishingArea[i] = malloc(w * sizeof(int));
-
-  //copy the fishing area
-  for(int i = 0; i < h; i++)  for(int j = 0; j < w; j++)  overlapFishingArea[i][j] = fishingArea[i][j];
-
-  //Overlap the copied fishing area with enemies positions
-  for (int i = 0; i < nBots; i++)  overlapFishingArea[bots[i].position.x][bots[i].position.y] = -1;
-
-  //As the map was overlap on my bot's position and I don't want to lose the information, I return it now
-  overlapFishingArea[myPosition.x][myPosition.y] = fishingArea[myPosition.x][myPosition.y];
-
-  return overlapFishingArea;
-}
-
-Position FindCloserFishingSpot (int h, int w, int **overlapedFishingArea, Position myPosition) {
+Position FindCloserFishingSpot (int h, int w, int **overlappedFishingArea, Position myPosition) {
   Position closerFishingSpot = myPosition;
 
-  //Find the closer fishing spot
-  int distance = 999999999; //arbitrary big number
+  int distance = 999999999;
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
-      //If the position is a fishing spot
-      if (overlapedFishingArea[i][j] > 11 &&  overlapedFishingArea[i][j]%10 > 1) {
-        //calculate the distance from the current position
-        if (abs(myPosition.x - i) + abs(myPosition.y - j) < distance) { //If the distance of this fishing spot is smaller than the previous one
+      if (overlappedFishingArea[i][j] > 11 &&  overlappedFishingArea[i][j]%10 > 1) {
+        if (abs(myPosition.x - i) + abs(myPosition.y - j) < distance) {
           distance = abs(myPosition.x - i) + abs(myPosition.y - j);
-          //Save the closer fishing spot
           closerFishingSpot.x = i;
           closerFishingSpot.y = j;
-        } else if (distance == abs(myPosition.x - i) + abs(myPosition.y - j)) { //If the distance of this fishing spot is equal to the previous one
-          //find the better cost-benefit ratio
-          int currentCostBenefitRatio = FishPricing(overlapedFishingArea[i][j]/10)* (overlapedFishingArea[i][j]%10);
-          int previousCostBenefitRatio = FishPricing(overlapedFishingArea[closerFishingSpot.x][closerFishingSpot.y]/10) * (overlapedFishingArea[closerFishingSpot.x][closerFishingSpot.y]%10);
+        } else if (distance == abs(myPosition.x - i) + abs(myPosition.y - j)) {
+          int currentCostBenefitRatio = FishPricing(overlappedFishingArea[i][j]/10)* (overlappedFishingArea[i][j]%10);
+          int previousCostBenefitRatio = FishPricing(overlappedFishingArea[closerFishingSpot.x][closerFishingSpot.y]/10) * (overlappedFishingArea[closerFishingSpot.x][closerFishingSpot.y]%10);
           if (currentCostBenefitRatio > previousCostBenefitRatio) {
-            //Save the closer fishing spot with the better cost-benefit ratio
             closerFishingSpot.x = i;
             closerFishingSpot.y = j;
           }
@@ -109,69 +210,70 @@ Position FindCloserFishingSpot (int h, int w, int **overlapedFishingArea, Positi
   return closerFishingSpot; //if there is no closer fishing spot, the current position will be returned
 }
 
-int main() {
-  char line[MAX_STR];   // temporarily data
-  //char myId[MAX_STR]; 
-  int nBots;        
-  Bot *bots, myBot;
-  Position prePosition; // previous position of myBot
+int isNumber(char *line) {
+  int i = 0;
+  while (line[i] != '\0') {
+    if (line[i] < '0' || line[i] > '9') return 0;
+    i++;
+  }
+  return 1;
+}
 
-  setbuf(stdin, NULL);   // stdin, stdout and stderr are unbuffered, so nothing is keeping momentarily
-  setbuf(stdout, NULL);
-  setbuf(stderr, NULL);
-
-  // === START OF THE GAME ===
-  int h, w; // height and width of the fishing area
-  scanf("AREA %i %i", &h, &w);
-  printf("AREA %i %i\n", h, w);
-  int fishingArea[h][w];
-  int **overlapedFishingArea = NULL;
-  scanf(" ID %s", myBot.id); // the ' ' is necessary to read the '\n' of the previous line
-
-
-  // use fprintf(strerr, "STUFF", var) for debug if necessary. Ex: fprintf(stderr, "Meu id = %s\n", myId);
-
-  // === TURNS === 
-  while (1) {
-    memset(fishingArea, 0, sizeof(fishingArea)); // zera a área de pesca
-
-    // LÊ OS DADOS DO JOGO E ATUALIZA OS DADOS DO BOT
-    bots = ReadData(h, w, fishingArea, &nBots);
-
-    prePosition = myBot.position;
-
-    // find myBot in the list of bots (mainly the position)
-    for (int i = 0; i < nBots; i++) {
-      if (strcmp(bots[i].id, myBot.id) == 0) {
-        strcpy(myBot.id, bots[i].id);
-        myBot.position = bots[i].position;
-        break;
+Position FindCloserPort (int h, int w, int **overlappedFishingArea, Position myPosition) {
+  Position closerPort = myPosition;
+  int distance = 999999999;
+  for (int i = 0; i < h; i++) {
+    for (int j = 0; j < w; j++) {
+      if (overlappedFishingArea[i][j] == 1) {
+        if (abs(myPosition.x - i) + abs(myPosition.y - j) < distance) {
+          distance = abs(myPosition.x - i) + abs(myPosition.y - j);
+          closerPort.x = i;
+          closerPort.y = j;
+        }
       }
     }
-    // print the position of myBot
-    printf("POSITION %i %i\n", myBot.position.x, myBot.position.y);
-    // insert a logic to be executed each turn
-    overlapedFishingArea = OverlapFishingArea(h, w, fishingArea, nBots, bots, myBot.position);
-
-    
-    // print the overlapedFishingArea
-    for (int i = 0; i < h; i++) {
-      printf("%i|", i);
-      for (int j = 0; j < w; j++) {
-        printf("%i ", overlapedFishingArea[i][j]);
-      }
-      printf("\n");
-    }
-    
-
-    Position goalPosition = FindCloserFishingSpot(h, w, overlapedFishingArea, myBot.position);
-    printf("goalPosition = (%i, %i)\n", goalPosition.x, goalPosition.y);
-    // print the action to be executed
-    printf("RIGHT\n");
-
-    // read the response of the action of the bot and update his status (if necessary)
-    scanf("%s", line);
   }
 
-  return 0;
+  return closerPort;
+}
+
+int ** OverlapFishingArea(int h, int w, int fishingArea[h][w], int nBots, Bot bots[nBots], Position myPosition) {
+  int **overlapFishingArea = malloc(h * sizeof(int *));
+  for (int i = 0; i < h; i++) overlapFishingArea[i] = malloc(w * sizeof(int));
+
+  for(int i = 0; i < h; i++)  for(int j = 0; j < w; j++)  overlapFishingArea[i][j] = fishingArea[i][j];
+
+  for (int i = 0; i < nBots; i++)  overlapFishingArea[bots[i].position.x][bots[i].position.y] = -1;
+
+  overlapFishingArea[myPosition.x][myPosition.y] = fishingArea[myPosition.x][myPosition.y];
+
+  return overlapFishingArea;
+}
+
+int FishPricing(int x) { 
+  switch (x) {
+    case 1: return MULLET; break;
+    case 2: return SNAPPER; break;
+    case 3: return SEABASS; break;
+    default: return 0; break;
+  }
+}
+
+Bot * ReadData(int h, int w, int fishingArea[h][w], int *nBots, FILE *file) {
+  char id[MAX_STR];
+  int n;
+
+  for (int i = 0; i < h; i++) {   
+    for (int j = 0; j < w; j++) {
+      fscanf(file, "%i", &fishingArea[i][j]);
+    }
+  }
+
+  fscanf(file, " BOTS %i", &n); 
+  *nBots = n; 
+  Bot *bots = malloc(n * sizeof(Bot));
+  for (int i = 0; i < n; i++) {
+    fscanf(file, "%s %i %i", bots[i].id, &bots[i].position.x, &bots[i].position.y);
+  }
+  return bots;
 }
