@@ -84,14 +84,6 @@ int main() {
       }
     }
     fprintf(stderr, "Area: %ix%i - My ID: %s - My Position: %i %i  - Weight: %i\n", h, w, myBot.bot.id, myBot.bot.position.x, myBot.bot.position.y, myBot.weight);
-    /*
-    for (int i = 0; i < h; i++) {
-      for (int j = 0; j < w; j++) {
-        fprintf(stderr, "%i ", fishingArea[i][j]);
-      }
-      fprintf(stderr, "\n");
-    }
-    */
     // insert a logic to be executed each turn
     overlappedFishingArea = OverlapFishingArea(h, w, fishingArea, nBots, bots, myBot.bot.position);
     if (myBot.weight < 10) {
@@ -121,7 +113,7 @@ int main() {
     //If it's something else, then do nothing
     if (isNumber(line)){
       myBot.profit += atoi(line);
-      myBot.weight == 0;
+      myBot.weight = 0;
     } else if (strcmp(line, "MULLET") == 0 || strcmp(line, "SNAPPER") == 0 || strcmp(line, "SEABASS") == 0) myBot.weight++;
     else if (strcmp(line, "IMPACT") == 0) myBot.profit -= 5e4;
     else if (strcmp(line, "OUT") == 0)  myBot.profit -= 5e2;
