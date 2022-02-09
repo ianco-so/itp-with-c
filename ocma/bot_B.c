@@ -66,7 +66,6 @@ int main() {
         action = findPath(h, w, overlappedFishingArea, myBot.bot.position, goalPosition);
       }
     }
-    fprintf(stderr, "action: %s goal: %d %d\n", action, goalPosition.x, goalPosition.y);
     printf("%s\n",action);
 
     // read the response of the action of the bot and update his status (if necessary)
