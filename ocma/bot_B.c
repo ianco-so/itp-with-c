@@ -59,7 +59,7 @@ int main() {
         action = findPath(h, w, overlappedFishingArea, myBot.bot.position, goalPosition);
       }
     } else {
-      Position goalPosition = FindCloserPort(h, w, overlappedFishingArea, myBot.bot.position);
+      goalPosition = FindCloserPort(h, w, overlappedFishingArea, myBot.bot.position);
       if (goalPosition.x == myBot.bot.position.x && goalPosition.y == myBot.bot.position.y) {
         action = "SELL";
       } else  {
@@ -70,7 +70,7 @@ int main() {
 
     // read the response of the action of the bot and update his status (if necessary)
     scanf("%s", line);
-    if (isNumber(line)){
+    if (isNumber(line) && atoi(line) != 0) {
       myBot.weight = 0;
     } else if (strcmp(line, "MULLET") == 0 || strcmp(line, "SNAPPER") == 0 || strcmp(line, "SEABASS") == 0) myBot.weight++;
   }
