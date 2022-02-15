@@ -11,3 +11,7 @@ localizationA:
 	gcc localizationA.c -c $(PARAMS)
 localizationB:
 	gcc localizationB.c -c $(PARAMS)
+bot_test: bot_test.c
+	gcc bot_test.c -o bot_test $(PARAMS)
+debug:
+	node ocma -d bot_A bot_test
